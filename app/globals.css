@@ -1152,3 +1152,76 @@ h1 .edition{font-family:inherit;font-weight:500;font-size:10px;letter-spacing:.0
   color: #475569;
   line-height: 1.6;
 }
+
+/* ─── AUTHENTIC CLINICAL SONOGRAM VIEWER STYLES ─────────────── */
+.sono-screen-real {
+  position: relative;
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #020617;
+  border: 1px solid #1e293b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.real-sono-img-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.real-sono-img {
+  width: 100%;
+  height: auto;
+  max-height: 380px;
+  object-fit: contain;
+  background: #000000;
+  display: block;
+}
+.real-sono-img.probe-img {
+  max-height: 340px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+.real-sono-caption {
+  padding: 6px 10px;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #94a3b8;
+  background: #090d16;
+  border-top: 1px solid #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.sono-structure-chips-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #1e293b;
+}
+.sono-troubleshoot-box {
+  margin-top: 10px;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+.sono-troubleshoot-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #0369a1;
+  margin-bottom: 4px;
+}
+.sono-troubleshoot-text {
+  font-size: 11px;
+  color: #334155;
+  line-height: 1.5;
+  white-space: pre-line;
+}
