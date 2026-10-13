@@ -21,7 +21,7 @@ export default function AnatomyScene({atlas,state,onSelect,onProgress,onError}:P
   renderer.setPixelRatio(Math.min(devicePixelRatio,innerWidth<768?1.5:2));renderer.setClearColor('#f2f3f3');renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;el.appendChild(renderer.domElement);
   renderer.domElement.setAttribute('aria-label','Interactive human anatomy. Drag to orbit, pinch or scroll to zoom, and tap a structure to inspect it.');
   const scene=new T.Scene(),camera=new T.PerspectiveCamera(34,1,.005,100),controls=new OrbitControls(camera,renderer.domElement);
-  camera.position.set(1.4,1.05,3.6);controls.target.set(0,.85,0);controls.enableDamping=true;controls.dampingFactor=.085;controls.minDistance=.07;controls.maxDistance=40;controls.maxPolarAngle=Math.PI*.96;controls.addEventListener('change',()=>{dirty=true;});
+  camera.position.set(1.4,1.05,3.6);controls.target.set(0,.85,0);controls.enableDamping=true;controls.dampingFactor=.085;controls.minDistance=.07;controls.maxDistance=40;controls.maxPolarAngle=Math.PI*.96;controls.screenSpacePanning=true;controls.enablePan=true;controls.panSpeed=0.85;controls.addEventListener('change',()=>{dirty=true;});
   const pmrem=new T.PMREMGenerator(renderer),room=new RoomEnvironment(),env=pmrem.fromScene(room,.04);scene.environment=env.texture;room.dispose();pmrem.dispose();
   scene.add(new T.HemisphereLight(0xffffff,0xa7acb2,1.05));
   const key=new T.DirectionalLight(0xfffaf4,2.3);key.position.set(-2,4,3);scene.add(key);
@@ -97,6 +97,60 @@ export default function AnatomyScene({atlas,state,onSelect,onProgress,onError}:P
    if(found<0&&amount>.45)found=findTarget(e.clientX-rect.left,e.clientY-rect.top,e.pointerType==='touch'?24:16);if(found>=0){hover.hidden=true;select.current(atlas.parts[found].id);}
   };
   renderer.domElement.addEventListener('pointerdown',down);renderer.domElement.addEventListener('pointermove',move);renderer.domElement.addEventListener('pointerup',up);renderer.domElement.addEventListener('pointercancel',cancel);
+  const onWheel=(e:WheelEvent)=>{
+    if(!ready||amount>0.8)return;
+    const rect=renderer.domElement.getBoundingClientRect();
+    pointer.set(((e.clientX-rect.left)/rect.width)*2-1,-((e.clientY-rect.top)/rect.height)*2+1);
+    raycaster.setFromCamera(pointer,camera);
+    let hit:T.Vector3|null=null,nearest=Infinity;
+    const hasSolid=atlas.parts.some((p,i)=>p.system!=='integumentary'&&data[i*4+3]>0.5);
+    for(let i=0;i<pickers.length;i++){
+      const mesh=pickers[i];
+      if(!mesh||data[i*4+3]<0.5||(hasSolid&&atlas.parts[i].system==='integumentary'))continue;
+      worldBox.copy(bounds[i]).translate(mesh.position);
+      if(!raycaster.ray.intersectBox(worldBox,hitPoint))continue;
+      const hits=raycaster.intersectObject(mesh,false);
+      if(hits[0]&&hits[0].distance<nearest){nearest=hits[0].distance;hit=hits[0].point.clone();}
+    }
+    if(!hit){
+      const plane=new T.Plane();
+      plane.setFromNormalAndCoplanarPoint(camera.getWorldDirection(new T.Vector3()).negate(),controls.target);
+      const targetPoint=new T.Vector3();
+      if(raycaster.ray.intersectPlane(plane,targetPoint)){hit=targetPoint;}
+    }
+    if(hit&&e.deltaY<0){
+      const lerpWeight=Math.min(0.25,Math.abs(e.deltaY)*0.002);
+      controls.target.lerp(hit,lerpWeight);
+      dirty=true;
+    }
+  };
+  const onDblClick=(e:MouseEvent)=>{
+    if(!ready)return;
+    const rect=renderer.domElement.getBoundingClientRect();
+    pointer.set(((e.clientX-rect.left)/rect.width)*2-1,-((e.clientY-rect.top)/rect.height)*2+1);
+    raycaster.setFromCamera(pointer,camera);
+    let nearest=Infinity,hit:T.Vector3|null=null,found=-1;
+    const hasSolid=atlas.parts.some((p,i)=>p.system!=='integumentary'&&data[i*4+3]>0.5);
+    for(let i=0;i<pickers.length;i++){
+      const mesh=pickers[i];
+      if(!mesh||data[i*4+3]<0.5||(hasSolid&&atlas.parts[i].system==='integumentary'))continue;
+      worldBox.copy(bounds[i]).translate(mesh.position);
+      if(!raycaster.ray.intersectBox(worldBox,hitPoint))continue;
+      const hits=raycaster.intersectObject(mesh,false);
+      if(hits[0]&&hits[0].distance<nearest){nearest=hits[0].distance;hit=hits[0].point.clone();found=i;}
+    }
+    if(hit){
+      controls.target.copy(hit);
+      const dir=camera.position.clone().sub(controls.target).normalize();
+      const currentDist=camera.position.distanceTo(controls.target);
+      camera.position.copy(controls.target).addScaledVector(dir,Math.min(currentDist,0.65));
+      controls.update();
+      dirty=true;
+      if(found>=0){select.current(atlas.parts[found].id);}
+    }
+  };
+  renderer.domElement.addEventListener('wheel',onWheel,{passive:true});
+  renderer.domElement.addEventListener('dblclick',onDblClick);
   const clock=new T.Clock();let lastExtent=-1;
   const animate=()=>{
    if(disposed)return;frame=requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.05),s=latest.current;
@@ -150,7 +204,7 @@ export default function AnatomyScene({atlas,state,onSelect,onProgress,onError}:P
 
   };animate();
   const contextLost=(e:Event)=>{e.preventDefault();onError('The 3D session was paused by your device. Reload to continue.');};renderer.domElement.addEventListener('webglcontextlost',contextLost);
-  return()=>{disposed=true;abort.abort();cancelAnimationFrame(frame);observer.disconnect();controls.dispose();geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());scene.traverse(o=>{if(o instanceof T.Mesh&&!geometries.includes(o.geometry)){o.geometry.dispose();const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>m.dispose());}});env.dispose();partTexture.dispose();selectionTexture.dispose();markerGeometry.dispose();markerMaterial.dispose();hover.remove();renderer.dispose();renderer.domElement.remove();};
+  return()=>{disposed=true;abort.abort();cancelAnimationFrame(frame);observer.disconnect();controls.dispose();geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());scene.traverse(o=>{if(o instanceof T.Mesh&&!geometries.includes(o.geometry)){o.geometry.dispose();const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>m.dispose());}});env.dispose();partTexture.dispose();selectionTexture.dispose();markerGeometry.dispose();markerMaterial.dispose();renderer.domElement.removeEventListener('wheel',onWheel);renderer.domElement.removeEventListener('dblclick',onDblClick);hover.remove();renderer.dispose();renderer.domElement.remove();};
  },[atlas]);
  return <div className="scene" ref={host}/>;
 }

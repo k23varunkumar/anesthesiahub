@@ -13,6 +13,8 @@ import {DEFAULT_VISIBLE,SYSTEMS,EXPLANATIONS,explanation,type Atlas,type Concept
 import {CLINICAL_PRESETS,getAnesthesiaPearl,type ClinicalPreset} from './anesthesia-presets';
 import {getPGTopic,OSCE_SPOTTERS,type PGTopicData,type OSCESpotter} from './pg-exam-data';
 import {resolveAssetUrl} from '@/lib/utils';
+import {SonoanatomyModal} from '@/components/sonoanatomy-modal';
+import {ClinicalToolsModal} from '@/components/clinical-tools-modal';
 
 const initial:SceneState={explode:0,visible:DEFAULT_VISIBLE,selected:[],isolate:false,xray:false,autoFocus:true,view:'three-quarter',rotate:false,reset:0};
 
@@ -31,6 +33,9 @@ export default function Home(){
  const [activeDetailTab,setActiveDetailTab]=useState<'clinical'|'viva'>('clinical');
  const [spotterIndex,setSpotterIndex]=useState<number|null>(null);
  const [showSpotterAnswer,setShowSpotterAnswer]=useState<boolean>(false);
+ const [sonoModalOpen,setSonoModalOpen]=useState<boolean>(false);
+ const [clinicalModalOpen,setClinicalModalOpen]=useState<boolean>(false);
+ const [currentBlockId,setCurrentBlockId]=useState<string>('supraclavicular');
 
  useEffect(()=>{
   const abort=new AbortController();
@@ -258,6 +263,26 @@ export default function Home(){
   )}
 
   <nav className="top-actions" aria-label="Explorer panels">
+    <Button
+      variant="ghost"
+      className="pg-quiz-btn"
+      style={{background:sonoModalOpen?'#0f766e':'#ffffffd9',color:sonoModalOpen?'#ffffff':'#0f766e',border:'1px solid #0f766e33',borderRadius:10,padding:'0 12px',height:42,display:'flex',alignItems:'center',gap:7,fontSize:12,fontWeight:700}}
+      onClick={()=>setSonoModalOpen(true)}
+      title="Interactive Ultrasound Sonoanatomy & Needle Simulator"
+    >
+      <Scan size={18}/>
+      <span>USGRA Sono Simulator</span>
+    </Button>
+    <Button
+      variant="ghost"
+      className="pg-quiz-btn"
+      style={{background:clinicalModalOpen?'#0369a1':'#ffffffd9',color:clinicalModalOpen?'#ffffff':'#0369a1',border:'1px solid #0284c733',borderRadius:10,padding:'0 12px',height:42,display:'flex',alignItems:'center',gap:7,fontSize:12,fontWeight:700}}
+      onClick={()=>setClinicalModalOpen(true)}
+      title="Weight-Calibrated Drug Dosing & Crisis Checklists"
+    >
+      <Syringe size={18}/>
+      <span>OT Drugs & Crisis (LAST/DAS)</span>
+    </Button>
    <Button
      variant="ghost"
      className={`pg-quiz-btn ${spotterIndex!==null?'active':''}`}
@@ -646,5 +671,22 @@ export default function Home(){
     </div>
    </SheetContent>
   </Sheet>
+
+   {sonoModalOpen && (
+     <SonoanatomyModal
+       initialBlockId={currentBlockId}
+       onClose={()=>setSonoModalOpen(false)}
+       onSelectAtlasStructure={(name)=>{
+         const concept = atlas?.concepts.find(item => item.name.toLowerCase().includes(name.toLowerCase()));
+         if(concept) choose(concept);
+       }}
+     />
+   )}
+
+   {clinicalModalOpen && (
+     <ClinicalToolsModal
+       onClose={()=>setClinicalModalOpen(false)}
+     />
+   )}
  </main>;
 }

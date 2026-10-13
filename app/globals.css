@@ -510,3 +510,645 @@ h1 .edition{font-family:inherit;font-weight:500;font-size:10px;letter-spacing:.0
 .spotter-btn-next:hover {
   background: #dde7ec;
 }
+
+/* ─── SONOANATOMY ULTRASOUND SIMULATOR STYLES ───────────────── */
+.sono-overlay, .clinical-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(10, 20, 30, 0.72);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fadeIn 0.2s ease-out;
+}
+.sono-window, .clinical-window {
+  width: 100%;
+  max-width: 960px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  background: #fffffffa;
+  border: 1px solid rgba(0, 240, 255, 0.25);
+  border-radius: 16px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3), 0 0 35px rgba(0, 240, 255, 0.12);
+  overflow: hidden;
+}
+.sono-header, .clinical-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.sono-header {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+.sono-title-group, .clinical-title-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.sono-icon, .clinical-title-icon {
+  font-size: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: #e0f7fa;
+  border: 1px solid #00f0ff55;
+  border-radius: 12px;
+}
+.sono-title, .clinical-title-text {
+  font-size: 17px;
+  font-weight: 800;
+  color: #0f172a;
+}
+.sono-subtitle, .clinical-sub-text {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 2px;
+}
+.sono-selector-bar {
+  display: flex;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #f1f5f9;
+  border-bottom: 1px solid #e2e8f0;
+  overflow-x: auto;
+}
+.sono-tab-btn {
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+.sono-tab-btn.active {
+  background: #0f766e;
+  color: #ffffff;
+  border-color: #0f766e;
+  box-shadow: 0 2px 6px rgba(15, 118, 110, 0.25);
+}
+.sono-body-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 16px;
+  padding: 16px 20px;
+  overflow-y: auto;
+}
+@media (max-width: 820px) {
+  .sono-body-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.sono-screen-container {
+  display: flex;
+  flex-direction: column;
+}
+.sono-bezel {
+  background: #020617;
+  border: 2px solid #1e293b;
+  border-radius: 12px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.8);
+}
+.sono-bezel-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.sono-bezel-tag {
+  font-family: monospace;
+  font-size: 10px;
+  color: #38bdf8;
+  background: #0f172a;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid #1e293b;
+}
+.sono-needle-toggle {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #94a3b8;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.sono-needle-toggle.on {
+  color: #00f0ff;
+  border-color: #00f0ff66;
+  background: #083344;
+}
+.sono-screen {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 400 / 280;
+  background: radial-gradient(circle at 50% 10%, #0f172a 0%, #020617 100%);
+  border: 1px solid #1e293b;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.sono-speckle {
+  position: absolute;
+  inset: 0;
+  opacity: 0.14;
+  background-image: radial-gradient(#ffffff 1px, transparent 1px);
+  background-size: 6px 6px;
+  pointer-events: none;
+}
+.sono-svg {
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+}
+.sono-shape.interactive {
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.sono-shape.interactive:hover {
+  filter: drop-shadow(0 0 5px #00f0ff);
+}
+.sono-caliper {
+  position: absolute;
+  right: 6px;
+  top: 10px;
+  bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-family: monospace;
+  font-size: 9px;
+  color: #64748b;
+  pointer-events: none;
+}
+.sono-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+.sono-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  background: #0f172a;
+  color: #94a3b8;
+  border: 1px solid #1e293b;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.sono-legend-item.active {
+  color: #00f0ff;
+  border-color: #00f0ff;
+  background: #083344;
+}
+.sono-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.sono-spec-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.sono-inspector-card {
+  padding: 14px;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px solid #00f0ff44;
+}
+.sono-inspector-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.sono-tag-type {
+  font-size: 9.5px;
+  font-weight: 800;
+  color: #0891b2;
+  background: #cffafe;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.sono-structure-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #0f172a;
+}
+.sono-feature-row {
+  font-size: 11.5px;
+  color: #334155;
+  margin-top: 6px;
+  line-height: 1.45;
+}
+.sono-feature-row strong {
+  color: #0f172a;
+  margin-right: 4px;
+}
+.sono-atlas-link-btn {
+  margin-top: 10px;
+  width: 100%;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #0f766e;
+  border-color: #0f766e44;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.sono-inspector-empty {
+  padding: 16px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: #64748b;
+  background: #f8fafc;
+}
+.sono-clinical-card {
+  padding: 14px;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+.sono-card-heading {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0f766e;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.sono-ganga-pearl {
+  font-size: 11.5px;
+  color: #334155;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+.sono-dosage-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  background: #ffffff;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+.sono-dose-col {
+  display: flex;
+  flex-direction: column;
+}
+.sono-dose-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+}
+.sono-dose-val {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-top: 2px;
+}
+.sono-warning-box {
+  margin-top: 10px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 11px;
+  color: #991b1b;
+  line-height: 1.4;
+}
+
+/* ─── CLINICAL DECISION & CRISIS STYLES ─────────────────────── */
+.patient-weight-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #ffffff;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+.patient-weight-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #1e293b;
+}
+.patient-weight-badge {
+  font-size: 14px;
+  font-weight: 800;
+  color: #0284c7;
+  background: #e0f2fe;
+  padding: 2px 10px;
+  border-radius: 6px;
+}
+.weight-slider {
+  width: 100%;
+  accent-color: #0284c7;
+  cursor: pointer;
+}
+.weight-presets {
+  display: flex;
+  gap: 6px;
+}
+.weight-chip {
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #475569;
+  cursor: pointer;
+}
+.weight-chip.active {
+  background: #0284c7;
+  color: white;
+  border-color: #0284c7;
+}
+.clinical-mode-tabs {
+  display: flex;
+  gap: 8px;
+}
+.clinical-mode-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.clinical-mode-tab.active {
+  background: #0f172a;
+  color: #00f0ff;
+  border-color: #0f172a;
+}
+.clinical-drugs-scroll, .crisis-scroll {
+  padding: 16px 20px;
+  overflow-y: auto;
+  max-height: calc(90vh - 220px);
+}
+.drugs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 12px;
+}
+.drug-card {
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.drug-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+.drug-name {
+  font-size: 14px;
+  font-weight: 800;
+  color: #0f172a;
+  display: block;
+}
+.drug-cat-badge {
+  font-size: 9px;
+  padding: 1px 5px;
+  margin-top: 2px;
+}
+.drug-total-box {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  background: #e0f2fe;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+.drug-total-val {
+  font-size: 16px;
+  font-weight: 900;
+  color: #0369a1;
+}
+.drug-total-unit {
+  font-size: 10px;
+  font-weight: 700;
+  color: #0369a1;
+}
+.drug-calc-sub {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10.5px;
+  color: #64748b;
+  font-weight: 600;
+}
+.drug-vol-pill {
+  color: #0d9488;
+  font-weight: 700;
+}
+.drug-note {
+  font-size: 11px;
+  color: #475569;
+  line-height: 1.4;
+  margin-top: 4px;
+  border-top: 1px solid #edf2f7;
+  padding-top: 6px;
+}
+.crisis-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.crisis-selector-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.crisis-selector-btn.active.last {
+  background: #991b1b;
+  color: #ffffff;
+  border-color: #991b1b;
+}
+.crisis-selector-btn.active.das {
+  background: #b45309;
+  color: #ffffff;
+  border-color: #b45309;
+}
+.crisis-selector-btn.active.mh {
+  background: #6b21a8;
+  color: #ffffff;
+  border-color: #6b21a8;
+}
+.crisis-content-box {
+  border-radius: 12px;
+  padding: 16px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+}
+.crisis-box-header {
+  border-left: 4px solid;
+  padding-left: 12px;
+  margin-bottom: 14px;
+}
+.crisis-box-title {
+  font-size: 16px;
+  font-weight: 800;
+}
+.crisis-box-sub {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 2px;
+}
+.crisis-dosing-section {
+  margin-bottom: 16px;
+}
+.crisis-section-heading {
+  font-size: 12px;
+  font-weight: 800;
+  color: #1e293b;
+  margin-bottom: 8px;
+}
+.crisis-dosing-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+}
+.crisis-dose-card {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+.crisis-dose-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: #334155;
+}
+.crisis-dose-calc {
+  font-size: 15px;
+  font-weight: 900;
+  margin: 4px 0;
+}
+.crisis-dose-route {
+  font-size: 10px;
+  font-weight: 700;
+  color: #0284c7;
+}
+.crisis-dose-inst {
+  font-size: 10.5px;
+  color: #64748b;
+  line-height: 1.35;
+  margin-top: 4px;
+}
+.crisis-checklist-section {
+  margin-bottom: 16px;
+}
+.checklist-items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.checklist-item.checked {
+  background: #f0fdf4;
+  border-color: #86efac;
+}
+.check-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: #e2e8f0;
+  color: #475569;
+  font-size: 10px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.check-icon.on {
+  background: #22c55e;
+  color: white;
+}
+.check-text {
+  font-size: 12px;
+  color: #1e293b;
+  line-height: 1.4;
+}
+.checklist-item.checked .check-text {
+  text-decoration: line-through;
+  color: #64748b;
+}
+.crisis-pearls-list {
+  padding-left: 18px;
+  font-size: 11.5px;
+  color: #475569;
+  line-height: 1.6;
+}
