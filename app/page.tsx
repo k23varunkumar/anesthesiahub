@@ -634,12 +634,26 @@ export default function Home(){
     </div>
 
     <div className="detail-actions">
-      <Button className={`primary-action ${state.isolate?'active':''}`} onClick={()=>setState(s=>({...s,isolate:!s.isolate,explode:0}))}>
-        <Focus size={18}/>{state.isolate?'Show surrounding anatomy':'Isolate structure'}<ChevronRight size={16}/>
-      </Button>
-      <Button className={`primary-action ${state.xray?'active':''}`} style={{background:state.xray?'#135364':'#ffffff',color:state.xray?'#ffffff':'#233644',border:'1px solid #18253620'}} onClick={()=>setState(s=>({...s,xray:!s.xray}))}>
-        <Scan size={18}/>{state.xray?'Exit X-Ray mode':'X-Ray ghost anatomy'}<ChevronRight size={16}/>
-      </Button>
+      <div className="detail-action-row">
+        <button
+          type="button"
+          className={`action-pill-btn ${state.isolate?'active':''}`}
+          onClick={()=>setState(s=>({...s,isolate:!s.isolate,explode:0}))}
+          title={state.isolate?'Show surrounding anatomy':'Isolate selected structure in 3D'}
+        >
+          <Focus size={15}/>
+          <span>{state.isolate?'Show All':'Isolate'}</span>
+        </button>
+        <button
+          type="button"
+          className={`action-pill-btn xray ${state.xray?'active':''}`}
+          onClick={()=>setState(s=>({...s,xray:!s.xray}))}
+          title={state.xray?'Exit X-Ray transparency mode':'Enable Bayer semi-transparent X-Ray view'}
+        >
+          <Scan size={15}/>
+          <span>{state.xray?'Exit X-Ray':'X-Ray Ghost'}</span>
+        </button>
+      </div>
       <Button variant="ghost" className="secondary-action" onClick={()=>{setState(s=>({...s,selected:[],isolate:false,xray:false}));setDetails(false);}}>
         Clear selection
       </Button>
